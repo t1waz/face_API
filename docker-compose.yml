@@ -1,0 +1,99 @@
+version: "3.9"
+
+x-restart-policy: &restart_policy
+  restart: always
+
+volumes:
+  db_data: {}
+
+services:
+  face_backend:
+    <<: *restart_policy
+    build:
+      context: .
+      dockerfile: ./compose/backend/Dockerfile
+    command: uvicorn face_backend.main:app --reload --host 0.0.0.0 --port 8000
+    volumes:
+      - ./src:/app
+      - ./files:/files
+    env_file: .envs
+    healthcheck:
+      test: wget --no-verbose -O /dev/null --tries=1 http://face_backend:8000/health || exit 1
+      interval: 2s
+      timeout: 3s
+      retries: 5
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      face_consumer:
+        condition: service_started
+    networks:
+      - face_backend
+
+  face_consumer:
+    <<: *restart_policy
+    build:
+      context: .
+      dockerfile: ./compose/consumer/Dockerfile
+    command: python face_consumer/consumer.py
+    volumes:
+      - ./src:/app
+      - ./files:/files
+    env_file: .envs
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - face_backend
+
+  db:
+    <<: *restart_policy
+    image: postgres:15-alpine
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    env_file: .envs
+    healthcheck:
+      test: pg_isready -U postgres -d postgres -h db -p 5432
+      interval: 2s
+      timeout: 3s
+      retries: 5
+    networks:
+      - face_backend
+
+  redis:
+    <<: *restart_policy
+    build:
+      context: .
+      dockerfile: ./compose/redis/Dockerfile
+    command: sh -c "redis-server /config/redis.conf && redis-cli flushall"
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      interval: 2s
+      timeout: 3s
+      retries: 5
+    env_file: .envs
+    sysctls:
+      net.core.somaxconn: '511'
+    networks:
+      - face_backend
+
+  nginx:
+    image: nginx:alpine
+    volumes:
+    - ./files/processed:/static
+    - ./compose/nginx/app.conf:/etc/nginx/conf.d/app.conf
+    ports:
+      - "8000:8000"
+    depends_on:
+      face_backend:
+        condition: service_healthy
+    env_file: .envs
+    networks:
+      - face_backend
+
+networks:
+  face_backend:
