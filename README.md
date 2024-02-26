@@ -17,8 +17,11 @@ Run app and go to /docs OR:
     $ cp example.envs .envs
     $ docker compose build
 
+### RUN
+
 app -> localhost:8282/
 
+    $ docker compose up
 
 ### TESTS
 
@@ -95,4 +98,6 @@ app -> localhost:8282/
 - make more unit tests
 - create pyproject.toml + all stuff with pre-commit etc etc
 - make real separate webserver/consumer Dockerfiles
+- clear dockerfiles
+- move to poetry + clear requirements
 - clear TODO comments
