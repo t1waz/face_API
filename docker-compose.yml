@@ -12,13 +12,13 @@ services:
     build:
       context: .
       dockerfile: ./compose/backend/Dockerfile
-    command: uvicorn face_backend.main:app --reload --host 0.0.0.0 --port 8000
+    command: uvicorn face_backend.main:app --reload --host 0.0.0.0 --port 8282
     volumes:
       - ./src:/app
       - ./files:/files
     env_file: .envs
     healthcheck:
-      test: wget --no-verbose -O /dev/null --tries=1 http://face_backend:8000/health || exit 1
+      test: wget --no-verbose -O /dev/null --tries=1 http://face_backend:8282/health || exit 1
       interval: 2s
       timeout: 3s
       retries: 5
@@ -87,7 +87,7 @@ services:
     - ./files/processed:/static
     - ./compose/nginx/app.conf:/etc/nginx/conf.d/app.conf
     ports:
-      - "8000:8000"
+      - "8282:8282"
     depends_on:
       face_backend:
         condition: service_healthy

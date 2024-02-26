@@ -47,9 +47,7 @@ class FaceDetector:
         )
 
     def _convert_img_to_upload_file(self, img) -> UploadFile:
-        is_success, buffer = cv2.imencode(
-            f".{self.DEFAULT_EXTENSION}", img
-        )
+        is_success, buffer = cv2.imencode(f".{self.DEFAULT_EXTENSION}", img)
         if not is_success:
             raise DetectorException("internal error for processed img")
         return UploadFile(

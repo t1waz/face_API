@@ -30,7 +30,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    docs_url="/docs", routes=[WebSocketRoute("/ws", FaceJobEcho)], lifespan=lifespan
+    docs_url="/docs", routes=[WebSocketRoute("/faces", FaceJobEcho)], lifespan=lifespan
 )
 app.include_router(jobs_router, tags=["jobs"])
 
@@ -41,7 +41,7 @@ async def handle_job_exception(
     exc: JobException,
 ):
     if exc.is_critical:
-        status_code = 204
+        status_code = 400
     else:
         status_code = 202
 
@@ -97,6 +97,7 @@ async def create_face_job(file: UploadFile) -> Dict:
     face_job = await image_face_job_service.create_job_for_file(file=file)
 
     return face_job.as_dict
+
 
 @app.get("/health")
 def health_check():

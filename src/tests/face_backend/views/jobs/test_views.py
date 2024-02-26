@@ -144,7 +144,7 @@ async def test_e2e_test_for_face_job_with_image_that_not_contains_face(test_clie
         app.url_path_for("get_face_job_processed_image", face_job_id=job_id)
     )
 
-    assert response_3.status_code == 204
+    assert response_3.status_code == 400
 
 
 async def test_e2e_test_for_face_job_with_image_that_contains_face(test_client):

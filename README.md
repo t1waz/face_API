@@ -12,6 +12,14 @@ Run app and go to /docs OR:
 - WS /ws                                -> connect to live stream of processed image urls
 
 
+### SETUP
+
+    $ cp example.envs .envs
+    $ docker compose build
+
+app -> localhost:8282/
+
+
 ### TESTS
 
     $ docker compose run face_backend pytest --asyncio-mode=auto

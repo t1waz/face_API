@@ -21,7 +21,7 @@ async def test_it_is_possible_to_receive_echo_face_job_data(
 
     await wait_for_job_finish(test_client=test_client, job_id=job_response_data["id"])
 
-    with ws_test_client.websocket_connect("/ws") as websocket:
+    with ws_test_client.websocket_connect("/faces") as websocket:
         websocket.send_text(json.dumps({"foo": "bar"}))
         ws_data = websocket.receive_json()
 
